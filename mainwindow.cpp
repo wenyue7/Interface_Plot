@@ -2,6 +2,7 @@
 #include "ui_mainwindow.h"
 
 #include <QtXml>
+#include <qprogressdialog.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -52,9 +53,49 @@ MainWindow::MainWindow(QWidget *parent) :
     QTextStream out(&file1);
     doc1.save(out,4);
     file1.close();
+
+    /***************************************************** 进度条 Bar 方式 **************************************************/
+    ui->progressBar->setRange(0,5000);
+    ui->progressBar->setValue(0);
+
+
 }
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    /***************************************************** 进度条 dialog方式 **************************************************/
+    //这个
+    QProgressDialog process(this);
+    process.setWindowModality(Qt::WindowModal);  //设置模态窗口
+    process.setMinimumDuration(0); //QProgressDialog有一个智能延迟，默认一切短于4秒的操作都不显示Dialog，所以这里把这个值设为0
+    process.setAttribute(Qt::WA_DeleteOnClose, true);  //有时候整个进度条会卡住，啥也不显示(一般是只显示一块白色的面板)然后就什么也动不了了调用close（）函数也关不掉。这时候 就需要progressDlg->setAttribute(Qt::WA_DeleteOnClose, true);这样在调用Close的时候，窗口一定会被 关掉。
+    process.setWindowTitle("处理进度");
+    process.setLabelText("processing......");
+    process.setCancelButtonText("取消");
+    process.setRange(0,5000);
+    for(int i = 0; i < 5000; i++){
+        for(int j = 0; j < 2000; j++){
+            process.setValue(i);  //注意此处的值要与 setRange 指令相吻合
+            if(process.wasCanceled())
+                break;
+        }
+    }
+    process.close();  //去掉这一句好像也没啥影响
+}
+
+void MainWindow::on_pushButton_2_clicked()
+{
+    for(int i = 0; i < 5000; i++){
+        for(int j = 0; j < 2000; j++){
+            ui->progressBar->setValue(i+1);  //注意此处的值要与 setRange 指令相吻合
+        }
+    }
+
+    ui->progressBar->setValue(0);
+
 }
