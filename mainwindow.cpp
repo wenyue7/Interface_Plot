@@ -3,6 +3,7 @@
 
 #include <QtXml>
 #include <qprogressdialog.h>
+#include <dialog.h>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -69,7 +70,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     /***************************************************** 进度条 dialog方式 **************************************************/
-    //这个
     QProgressDialog process(this);
     process.setWindowModality(Qt::WindowModal);  //设置模态窗口
     process.setMinimumDuration(0); //QProgressDialog有一个智能延迟，默认一切短于4秒的操作都不显示Dialog，所以这里把这个值设为0
@@ -98,4 +98,15 @@ void MainWindow::on_pushButton_2_clicked()
 
     ui->progressBar->setValue(0);
 
+
+}
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    dialog = new Dialog(this);
+    //dialog->setWindowModality(Qt::WindowModal); //设置对话框是模态还是非模态
+    dialog->setModal(true);  //也是设置模态和非模态,跟上一句作用一样,但是效果有细微差别,推荐这种方法
+    dialog->setWindowTitle("对话框");
+    //dialog->exec();  //只能是模态对话框,跟属性值无关
+    dialog->show();  //既可以是模态对话框也可以是非模态对话框,取决于modal属性
 }
