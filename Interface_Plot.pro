@@ -8,7 +8,7 @@ QT       += core gui
 
 QT += xml
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets  printsupport  #使用QCustomPlot需要加上  printsupport
 
 TARGET = Interface_Plot
 TEMPLATE = app
@@ -28,12 +28,17 @@ DEFINES += QT_DEPRECATED_WARNINGS
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    dialog.cpp
+    dialog.cpp \
+    qcustomplot.cpp
 
 HEADERS += \
         mainwindow.h \
-    dialog.h
+    dialog.h \
+    qcustomplot.h
 
 FORMS += \
         mainwindow.ui \
     dialog.ui
+
+INCLUDEPATH += /usr/local/qwt-6.1.3/include
+LIBS += -L"/usr/local/qwt-6.1.3/lib/" -lqwt

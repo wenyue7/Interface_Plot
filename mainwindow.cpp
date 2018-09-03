@@ -5,6 +5,8 @@
 #include <qprogressdialog.h>
 #include <dialog.h>
 
+#include "qcustomplot.h"
+
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
@@ -37,6 +39,8 @@ MainWindow::MainWindow(QWidget *parent) :
         if(n.isElement()){   //如果节点是元素
             QDomElement e = n.toElement();  //将其转换为元素
             qDebug() << e.tagName() << endl;
+            //qDebug() << e.text() << endl; //输出元素的值
+            //qDebug() << e.attribute("<属性名称>"); //输出<属性名称>对应的值
         }
         n = n.nextSibling();
     }
@@ -58,6 +62,10 @@ MainWindow::MainWindow(QWidget *parent) :
     /***************************************************** 进度条 Bar 方式 **************************************************/
     ui->progressBar->setRange(0,5000);
     ui->progressBar->setValue(0);
+
+    /************************************************** Plot QCustomPlot 方式 **********************************************/
+    ui->widget->setBackground(QBrush(QColor(125,125,125)));
+    /***************************************************** Plot Qwt 方式 ***************************************************/
 
 
 }
