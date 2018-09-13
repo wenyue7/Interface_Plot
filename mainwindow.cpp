@@ -67,6 +67,75 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widget->setBackground(QBrush(QColor(125,125,125)));
     /***************************************************** Plot Qwt 方式 ***************************************************/
 
+    /***************************************************** 多选下拉框 *******************************************************/
+    //---------列表形式
+    listwidget = new QListWidget(this);
+
+    for (int i = 0; i < 5; ++i)
+    {
+        QListWidgetItem *pItem = new QListWidgetItem(listwidget);
+        //pListWidget->addItem(pItem);
+        //pItem->setData(Qt::UserRole, i);
+        QCheckBox *pCheckBox = new QCheckBox(this);
+        pCheckBox->setText(QStringLiteral("Qter%1").arg(i));
+        //pListWidget->addItem(pItem);
+        pCheckBox->setStyleSheet(QString("QCheckBox {background-color:white;}"
+            "QCheckBox:checked{background-color:rgb(255,0,255,255);}"));
+        listwidget->setItemWidget(pItem, pCheckBox);
+        connect(pCheckBox, SIGNAL(stateChanged(int)), this, SLOT(combobox_list_solt(int)));
+    }
+
+    QLineEdit *lineedit;  //设置未点下拉框时的显示内容
+    lineedit = new QLineEdit(this);
+    lineedit->setReadOnly(true);
+
+    ui->comboBox->setModel(listwidget->model());
+    ui->comboBox->setView(listwidget);  //将listwidget添加到combobox中
+    ui->comboBox->setLineEdit(lineedit);  //设置未点下拉框时显示的内容
+    lineedit->setText("多选(列表)"); //注意这句要在ui->comboBox->setLineEdit(lineedit);之后加
+    ui->comboBox->setEditable(true);
+    ui->comboBox->setMaxVisibleItems(3);  //设置下拉框最大支持条数
+
+    setStyleSheet("QComboBox{border:1px solid gray;}"
+        "QComboBox QAbstractItemView::item{height:45px;}" //下拉选项高度
+        //"QComboBox::down-arrow{image:url(:/combobox/Resources/icon1.jpg);}" //下拉箭头
+        "QComboBox::drop-down{border:0px;}"); //下拉按钮
+    //---------表格形式
+    QTableWidget *tablewidget;
+    tablewidget = new QTableWidget(3,2,this); //3行2列  注意此处的行列需要与下边两个for循环吻合
+
+    for(int i = 0; i < 3; i++){  //设置行
+        tablewidget->setColumnWidth(i, 49);
+        tablewidget->setRowHeight(i, 50);
+        for(int j = 0; j < 2; j++){
+            QCheckBox *checbox = new QCheckBox(this);
+            tablewidget->setCellWidget(i, j, checbox);
+            checbox->setFixedSize(50, 50);
+            checbox->setStyleSheet(QString("QCheckBox {background-color:lightgray;}"
+                "QCheckBox:checked{background-color:white;}"));
+            checbox->setText(QStringLiteral("好%1").arg(i));
+            checbox->setCheckable(true);
+            connect(checbox, &QCheckBox::stateChanged, this, [this,i,j]{   //此处的connect函数使用lambda表达式
+                QObject *sender = this->sender();  //QObject::sender()返回发送信号的对象的指针，返回类型为QObject *
+                if(QCheckBox *checbox_dy = dynamic_cast<QCheckBox *>(sender)){  //dynamic_cast是函数模板,返回指定类型的对象,该对象必须继承自 QObject
+                    if(checbox_dy->isChecked()){  //如果被check到
+                        qDebug() << "You clicked " << i << "行 " << j << "列" << endl;
+                    }
+                }
+            });
+        }
+    }
+
+    QLineEdit *lineedit_2;  //设置未点下拉框时的显示内容
+    lineedit_2 = new QLineEdit(this);
+    lineedit_2->setReadOnly(true);
+
+    ui->comboBox_2->setModel(tablewidget->model());  //以下设置类似列表形式
+    ui->comboBox_2->setView(tablewidget);
+    ui->comboBox_2->setLineEdit(lineedit_2);
+    lineedit_2->setText("多选(表格)");
+    ui->comboBox_2->setEditable(true);
+    ui->comboBox_2->setMaxVisibleItems(2);
 
 }
 
@@ -98,6 +167,7 @@ void MainWindow::on_pushButton_clicked()
 
 void MainWindow::on_pushButton_2_clicked()
 {
+    /***************************************************** 继续 进度条 Bar 方式 **********************************************/
     for(int i = 0; i < 5000; i++){
         for(int j = 0; j < 2000; j++){
             ui->progressBar->setValue(i+1);  //注意此处的值要与 setRange 指令相吻合
@@ -117,4 +187,17 @@ void MainWindow::on_pushButton_3_clicked()
     dialog->setWindowTitle("对话框");
     //dialog->exec();  //只能是模态对话框,跟属性值无关
     dialog->show();  //既可以是模态对话框也可以是非模态对话框,取决于modal属性
+}
+
+void MainWindow::combobox_list_solt(int state)
+{
+    int nCount = listwidget->count();
+    for (int i = 0; i < nCount; i++){
+        QListWidgetItem *pItem = listwidget->item(i);  //以下三句是为了得到被选中的第i个复选框checbox
+        QWidget *pWidget = listwidget->itemWidget(pItem);
+        QCheckBox *pCheckBox = (QCheckBox *)pWidget;
+        if (pCheckBox->isChecked()){
+            qDebug() << "You clicked " << i << " 行" << endl;
+        }
+    }
 }

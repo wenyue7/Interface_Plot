@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QListWidget>
 #include <dialog.h>
 
 namespace Ui {
@@ -23,9 +24,12 @@ private slots:
 
     void on_pushButton_3_clicked();
 
+    void combobox_list_solt(int state);
+
 private:
     Ui::MainWindow *ui;
     Dialog *dialog;
+    QListWidget *listwidget;
 };
 
 #endif // MAINWINDOW_H
