@@ -137,11 +137,62 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->comboBox_2->setEditable(true);
     ui->comboBox_2->setMaxVisibleItems(2);
 
-}
+    ui->pushButton_4->installEventFilter(this);  //1.函数的参数是一个有事件过滤器的对象,安装之后过滤器仅对调用install的对象有效.
+                                                 //2.事件过滤器可以安装到任意 QObject 类型上面，并且可以安装多个。如果要实现全局的事件过滤器，则可以安装到 QApplication 或者 QCoreApplication 上面。
+}                                                //3.事件过滤器最好声明成public,不然在类外安装的事件过滤器可能无效
+                                                 //4.事件过滤器和被安装过滤器的组件必须在同一线程，否则，过滤器将不起作用。另外，如果在安装过滤器之后，这两个组件到了不同的线程，那么，只有等到二者重新回到同一线程的时候过滤器才会有效。
 
 MainWindow::~MainWindow()
 {
     delete ui;
+}
+
+bool MainWindow::eventFilter(QObject *watched, QEvent *event)
+{
+    if(watched == ui->pushButton_4){
+        if(event->type() == QEvent::MouseButtonPress){
+            QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
+            if(mouseEvent->button() == Qt::LeftButton) qDebug() << "This is eventFilter  You Press LeftButton" << endl;
+            if(mouseEvent->button() == Qt::RightButton) qDebug() << "This is eventFilter  You Press RightButton" << endl;
+            return true;
+        }else{
+            return false;
+        }
+    }else{
+        return QMainWindow::eventFilter(watched,event);
+    }
+}
+
+bool MainWindow::event(QEvent *event)
+{
+    if(event->type() == QEvent::MouseButtonPress){
+        QMouseEvent *mouseevent = static_cast<QMouseEvent *>(event);
+        if(mouseevent->button() == Qt::LeftButton){
+            qDebug() << "This is event()  You Clicked mouset leftbutton" << endl;
+            return true;
+        }
+        return false;  //这个地方我个人理解算是接收了事件,现象是如果在此处返回false,需要右击两次才能触发下面的mousePressEvent事件函数
+    }
+    return QMainWindow::event(event);  //注意:这句很重要
+}
+
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+    if(event->button() == Qt::LeftButton || event->button() == Qt::RightButton){
+        if(event->button() == Qt::LeftButton) qDebug() << "You Clicked Left Button" << endl;
+        if(event->button() == Qt::RightButton) qDebug() << "You Clicked Right Button" << endl;
+    }else{
+        QMainWindow::mousePressEvent(event);
+    }
+}
+
+void MainWindow::keyPressEvent(QKeyEvent *event)
+{
+    if(event->key() == Qt::Key_Control){
+        qDebug() << "You Press Ctrl" << endl;
+    }else{
+        QMainWindow::keyPressEvent(event);
+    }
 }
 
 void MainWindow::on_pushButton_clicked()

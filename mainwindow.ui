@@ -105,6 +105,19 @@
           </rect>
          </property>
         </widget>
+        <widget class="QPushButton" name="pushButton_4">
+         <property name="geometry">
+          <rect>
+           <x>60</x>
+           <y>280</y>
+           <width>131</width>
+           <height>25</height>
+          </rect>
+         </property>
+         <property name="text">
+          <string>事件过滤测试</string>
+         </property>
+        </widget>
        </widget>
        <widget class="QWidget" name="tab_2">
         <attribute name="title">
