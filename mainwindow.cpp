@@ -154,7 +154,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
             if(mouseEvent->button() == Qt::LeftButton) qDebug() << "This is eventFilter  You Press LeftButton" << endl;
             if(mouseEvent->button() == Qt::RightButton) qDebug() << "This is eventFilter  You Press RightButton" << endl;
-            return true;
+            return true; //return true表示接受事件,return false表示不接收事件,会继续传递处理
         }else{
             return false;
         }
@@ -179,6 +179,8 @@ bool MainWindow::event(QEvent *event)
 void MainWindow::mousePressEvent(QMouseEvent *event)
 {
     if(event->button() == Qt::LeftButton || event->button() == Qt::RightButton){
+        if(event->modifiers() == Qt::ControlModifier && event->button() == Qt::LeftButton) qDebug() << "You Clicked Left Button and Control" << endl; //鼠标键盘组合,方法一
+        //if(QApplication::keyboardModifiers() == Qt::ControlModifier && event->button() == Qt::LeftButton) qDebug() << "You Clicked Left Button and Control" << endl; //鼠标键盘组合,方法二
         if(event->button() == Qt::LeftButton) qDebug() << "You Clicked Left Button" << endl;
         if(event->button() == Qt::RightButton) qDebug() << "You Clicked Right Button" << endl;
     }else{
@@ -188,6 +190,8 @@ void MainWindow::mousePressEvent(QMouseEvent *event)
 
 void MainWindow::keyPressEvent(QKeyEvent *event)
 {
+    if(event->modifiers() == Qt::ControlModifier && event->key() == Qt::Key_A)  //键盘组合按键
+        qDebug() << "You Press Ctrl and A" << endl;
     if(event->key() == Qt::Key_Control){
         qDebug() << "You Press Ctrl" << endl;
     }else{
@@ -238,6 +242,11 @@ void MainWindow::on_pushButton_3_clicked()
     dialog->setWindowTitle("对话框");
     //dialog->exec();  //只能是模态对话框,跟属性值无关
     dialog->show();  //既可以是模态对话框也可以是非模态对话框,取决于modal属性
+}
+
+void MainWindow::on_pushButton_4_clicked()
+{
+    qDebug() << "You Clicked 事件过滤测试" << endl;
 }
 
 void MainWindow::combobox_list_solt(int state)
