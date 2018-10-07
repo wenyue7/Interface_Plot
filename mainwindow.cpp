@@ -4,6 +4,7 @@
 #include <QtXml>
 #include <qprogressdialog.h>
 #include <dialog.h>
+#include <qdatetime.h>
 
 #include "qcustomplot.h"
 
@@ -139,8 +140,15 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->pushButton_4->installEventFilter(this);  //1.函数的参数是一个有事件过滤器的对象,安装之后过滤器仅对调用install的对象有效.
                                                  //2.事件过滤器可以安装到任意 QObject 类型上面，并且可以安装多个。如果要实现全局的事件过滤器，则可以安装到 QApplication 或者 QCoreApplication 上面。
-}                                                //3.事件过滤器最好声明成public,不然在类外安装的事件过滤器可能无效
+                                                 //3.事件过滤器最好声明成public,不然在类外安装的事件过滤器可能无效
                                                  //4.事件过滤器和被安装过滤器的组件必须在同一线程，否则，过滤器将不起作用。另外，如果在安装过滤器之后，这两个组件到了不同的线程，那么，只有等到二者重新回到同一线程的时候过滤器才会有效。
+
+    /***************************************************** 时间戳 *******************************************************/
+    QDateTime currenttime = QDateTime::fromString( "1970-01-01 08:01:01:000", "yyyy-MM-dd hh:mm:ss:zzz" );
+    qDebug() << "current datetime:" << currenttime;
+    qDebug() << "current datetime stamp:" << currenttime.toTime_t(); //将时间转化成时间戳,方法为从时间基点到设定时间的秒数
+    qDebug() << "datetime stamp base on:" << currenttime.fromTime_t(0); //转化基点: 1970-01-01 08:01:01:000
+}
 
 MainWindow::~MainWindow()
 {
