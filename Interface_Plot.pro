@@ -29,16 +29,22 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     dialog.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    irregulardialog.cpp
 
 HEADERS += \
         mainwindow.h \
     dialog.h \
-    qcustomplot.h
+    qcustomplot.h \
+    irregulardialog.h
 
 FORMS += \
         mainwindow.ui \
-    dialog.ui
+    dialog.ui \
+    irregulardialog.ui
 
 INCLUDEPATH += /usr/local/qwt-6.1.3/include
 LIBS += -L"/usr/local/qwt-6.1.3/lib/" -lqwt
+
+RESOURCES += \
+    myresource.qrc

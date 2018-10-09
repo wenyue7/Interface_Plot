@@ -269,3 +269,13 @@ void MainWindow::combobox_list_solt(int state)
         }
     }
 }
+
+void MainWindow::on_pushButton_5_clicked()
+{
+    irglDialog = new IrregularDialog(this);
+    //irglDialog->setWindowModality(Qt::WindowModal); //设置对话框是模态还是非模态
+    irglDialog->setModal(true);  //也是设置模态和非模态,跟上一句作用一样,但是效果有细微差别,推荐这种方法
+    irglDialog->setWindowTitle("对话框");
+    //irglDialog->exec();  //只能是模态对话框,跟属性值无关
+    irglDialog->show();  //既可以是模态对话框也可以是非模态对话框,取决于modal属性
+}

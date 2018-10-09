@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QListWidget>
 #include <dialog.h>
+#include <irregulardialog.h>
 
 namespace Ui {
 class MainWindow;
@@ -38,9 +39,12 @@ private slots:
 
     void combobox_list_solt(int state);
 
+    void on_pushButton_5_clicked();
+
 private:
     Ui::MainWindow *ui;
     Dialog *dialog;
+    IrregularDialog *irglDialog;
     QListWidget *listwidget;
 };
 
