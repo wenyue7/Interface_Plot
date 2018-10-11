@@ -29,6 +29,11 @@ protected:
     void keyPressEvent(QKeyEvent *event) Q_DECL_OVERRIDE;
 
 private slots:
+
+    void menuFileOpen(bool);
+
+    void menuFileSave(bool);
+
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();

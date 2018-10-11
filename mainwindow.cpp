@@ -14,6 +14,58 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    /***************************************************** 窗口结构设置 **************************************************/
+    //窗口名字和窗口图标
+    setWindowTitle("Plot");
+    setWindowIcon(QIcon(":/png/linuxlogo")); //这个不是窗口标题旁边的图标,是任务栏的
+    //===============菜单栏=============
+    QMenuBar *m_MenuBar = ui->menuBar;  //添加一个菜单栏
+    //File菜单
+    QMenu *m_MenuFile = new QMenu("&File");  //前边加个 & 是为了保证按住alt键之后操作, & 加在哪个字母前就是使用哪个字母来作为操作
+    m_MenuBar->addMenu(m_MenuFile);
+    QAction *fileAction = new QAction(QIcon(":/png/linuxlogo"), "Open File"); //qaction可以选择加图标
+    m_MenuFile->addAction(fileAction);
+    QAction *fileAction_2 = new QAction("Save File");
+    m_MenuFile->addAction(fileAction_2);
+    //Edit菜单  增加子菜单
+    QMenu *m_MenuEdit = new QMenu("Edit");
+    QMenu *m_MenuEdit_SubA = new QMenu("SubA");
+    QAction *editActionA = new QAction("SubA_action");
+    m_MenuEdit_SubA->addAction( editActionA );
+    m_MenuEdit_SubA->setIcon(QIcon(":/png/linuxlogo"));  //菜单也可以设置图标
+    m_MenuEdit->addMenu(m_MenuEdit_SubA);
+    m_MenuBar->addMenu(m_MenuEdit);
+
+    connect(fileAction, &QAction::triggered, this, &MainWindow::menuFileOpen);
+    connect(fileAction_2, &QAction::triggered, this, &MainWindow::menuFileSave);
+
+//    QMenuBar *m_MenuBar_2 = new QMenuBar(this); //可以通过这种方法自己创建,但是要先删除ui里的菜单栏,不然无法正常工作,一个主窗口只能有一个菜单栏
+//    m_MenuBar_2->addMenu(m_MenuFile);
+
+    //===============工具栏=============
+    QToolBar *m_ToolBar = ui->mainToolBar;  //这里同样可以改成自己创建的工具栏
+    QAction *m_ToolBarOpen = new QAction(QIcon(":/png/linuxlogo"), "message"); //第一个参数是图标,第二个是提示信息
+    m_ToolBar->addAction(m_ToolBarOpen);
+    m_ToolBarOpen->setShortcut(tr("ctrl+o"));  //设置快捷键
+
+    connect(m_ToolBarOpen, &QAction::triggered, this, &MainWindow::menuFileOpen);
+
+    //===============状态栏=============
+    //说明:状态信息分为三类:临时信息(如一般的提示信息),正常信息(如页数和行号),永久信息(如版本号)
+    //ui->statusBar->showMessage("Welcome",2000); //第二个参数是显示事件,可以不设置事件,指输入一个参数
+    QLabel *statuelabel = new QLabel();
+    statuelabel->setMinimumSize(150,20);  //设置大小
+    statuelabel->setFrameShape(QFrame::WinPanel);  //设置标签形状
+    statuelabel->setFrameShadow(QFrame::Sunken);  //设置标签阴影
+    ui->statusBar->addWidget(statuelabel);
+    statuelabel->setText("欢迎");
+    //添加永久信息
+    QLabel *statuelabel_2 = new QLabel();
+    statuelabel_2->setMinimumSize(150,20);  //设置大小
+    statuelabel_2->setFrameShape(QFrame::WinPanel);  //设置标签形状
+    statuelabel_2->setFrameShadow(QFrame::Sunken);  //设置标签阴影
+    ui->statusBar->addPermanentWidget(statuelabel_2);
+    statuelabel_2->setText("永久信息");
     /***************************************************** xml件操作 **************************************************/
     QDomDocument doc;  //新建QDomDocument类对象，它代表一个XML文档
     QFile file("./my.xml");  // 建立指向“my.xml”文件的QFile对象
@@ -204,6 +256,32 @@ void MainWindow::keyPressEvent(QKeyEvent *event)
         qDebug() << "You Press Ctrl" << endl;
     }else{
         QMainWindow::keyPressEvent(event);
+    }
+}
+
+void MainWindow::menuFileOpen(bool)
+{
+    QString filename;
+    filename = QFileDialog::getOpenFileName(this, tr("Open File"), tr(""), tr("Text File (*.txt)")); //最后这个参数确定打开的格式,任意格式可以将 .txt 改成 .* ,第一个参数是新建窗口的名字
+    if(filename == ""){
+        return;
+    }else{
+        QFile file(filename); //以下写打开文件等操作
+        qDebug() << "I have get open file name: " << filename;
+    }
+}
+
+void MainWindow::menuFileSave(bool)
+{
+    if(true){  //这里的true可以改成一个新文件标志位,用来表示文件是否未保存过,进入if之后要记得更改这个状态
+        QString filename;
+        filename = QFileDialog::getSaveFileName(this, tr("Save File"), tr("/home"), tr("Text File (*.txt)")); //最后这个参数确定打开的格式,任意格式可以将 .txt 改成 .* ,第一个参数是新建窗口的名字
+        if(filename == ""){
+            return;
+        }else{
+            QFile file(filename); //以下写打开文件等操作
+            qDebug() << "I have get save file name: " << filename;
+        }
     }
 }
 
