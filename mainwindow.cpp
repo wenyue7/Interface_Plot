@@ -117,7 +117,46 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->progressBar->setValue(0);
 
     /************************************************** Plot QCustomPlot 方式 **********************************************/
-    ui->widget->setBackground(QBrush(QColor(125,125,125)));
+    ui->widget->setInteractions(QCP::iRangeDrag |  //拖拽
+                               QCP::iRangeZoom |   //缩放,可以对每个坐标轴进行缩放
+                               QCP::iSelectAxes |  //可选择坐标轴
+                               QCP::iSelectLegend |  //应该跟图例有关,但不知道有啥用
+                               QCP::iSelectPlottables);
+    ui->widget->axisRect()->setupFullAxesBox();  //设置四条坐标轴
+    ui->widget->setBackground(QBrush(QColor(125,125,125)));  //设置背景颜色
+    ui->widget->legend->setVisible(true);    //设置图例
+    ui->widget->legend->setFont(QFont("Helvetica", 9));
+    ui->widget->xAxis->setLabel("xAxis");  //设置坐标轴
+    ui->widget->xAxis->setTicker(false);
+    ui->widget->xAxis2->setLabel("xAxis2");
+    ui->widget->xAxis2->setTicker(false);
+    ui->widget->yAxis->setLabel("yAxis");
+    ui->widget->yAxis2->setLabel("yAxis2");
+
+    QVector<double> x(101),y(101);
+    for(int i=0;i<101;i++)
+    {
+        x[i] = i/5.0-10;
+        y[i] = x[i]*x[i]*x[i];
+    }
+    ui->widget->addGraph();  //添加一条曲线
+    ui->widget->graph(0)->setPen(QPen(Qt::yellow));
+    ui->widget->graph(0)->setName("曲线1");
+    ui->widget->graph(0)->setData(x,y);
+    QVector<double> x1(10), y1(10);
+    for(int i=0;i<10;i++)
+    {
+        x1[i] = i;
+        y1[i] = 100*i;
+    }
+    ui->widget->addGraph();  //添加第二条曲线
+    ui->widget->graph(1)->setPen(QPen(Qt::red));
+    ui->widget->graph(1)->setBrush(QBrush(QColor(0, 255, 255, 100)));
+    ui->widget->graph(1)->setName("曲线2");
+    ui->widget->graph(1)->setData(x1, y1);
+
+    ui->widget->xAxis->setRange(-11, 11);
+    ui->widget->yAxis->setRange(-1000, 1000);
     /***************************************************** Plot Qwt 方式 ***************************************************/
 
     /***************************************************** 多选下拉框 *******************************************************/
