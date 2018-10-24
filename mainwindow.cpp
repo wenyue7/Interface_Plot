@@ -6,6 +6,18 @@
 #include <dialog.h>
 #include <qdatetime.h>
 
+#include <qwt_plot.h>
+#include <qwt_plot_canvas.h>
+#include <qwt_plot_curve.h>
+#include <qwt_plot_magnifier.h>
+#include <qwt_plot_panner.h>
+#include <qwt_plot_zoomer.h>
+#include <qwt_plot_grid.h>
+#include <qwt_plot_legenditem.h>
+#include <qwt_legend.h>
+#include <qwt_plot_marker.h>
+#include <qwt_symbol.h>
+
 #include "qcustomplot.h"
 
 MainWindow::MainWindow(QWidget *parent) :
@@ -127,9 +139,9 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widget->legend->setVisible(true);    //设置图例
     ui->widget->legend->setFont(QFont("Helvetica", 9));
     ui->widget->xAxis->setLabel("xAxis");  //设置坐标轴
-    ui->widget->xAxis->setTicker(false);
+    //ui->widget->xAxis->setTicker(false);
     ui->widget->xAxis2->setLabel("xAxis2");
-    ui->widget->xAxis2->setTicker(false);
+    //ui->widget->xAxis2->setTicker(false);
     ui->widget->yAxis->setLabel("yAxis");
     ui->widget->yAxis2->setLabel("yAxis2");
 
@@ -158,6 +170,200 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->widget->xAxis->setRange(-11, 11);
     ui->widget->yAxis->setRange(-1000, 1000);
     /***************************************************** Plot Qwt 方式 ***************************************************/
+    //设置标题
+    ui->qwtPlot->detachItems();
+    QwtText title;
+    title.setText("速度");
+    QFont font1("宋体",10);
+    title.setFont(font1);
+    ui->qwtPlot->setTitle(title);
+    ui->qwtPlot->setPalette( Qt::red );
+    ui->qwtPlot->setStyleSheet( "background-color:rgb(255, 255, 0, 255);color:rgb(255, 0, 255, 255)" );  //设置背景颜色和前景色  也可以写成background-color:yellow
+
+    //设置画布
+    QwtPlotCanvas *canvas;
+    canvas = new QwtPlotCanvas();
+    canvas->setPalette(Qt::black);
+    canvas->setFrameStyle(QFrame::NoFrame);
+    ui->qwtPlot->setCanvas(canvas);
+
+    //设置网格
+    QwtPlotGrid *grid;
+    grid = new QwtPlotGrid();
+    grid->enableX(true);
+    grid->enableY(true);
+    grid->setMajorPen(Qt::green, 0, Qt::DotLine);
+    grid->attach(ui->qwtPlot);
+
+    //坐标轴上的字体
+    QFont font2("宋体", 12);
+    ui->qwtPlot->setAxisFont(QwtPlot::xBottom, font2);
+    ui->qwtPlot->setAxisFont(QwtPlot::yLeft, font2);
+
+//    ui->qwtPlot->setAxisAutoScale(QwtPlot::yLeft, true);  //设置自动坐标轴尺度
+//    ui->qwtPlot->setAxisAutoScale(QwtPlot::xBottom, true);
+    //以下坐标轴刻度的选择不能与上边自动坐标轴共存,只能设置一个,后设置的会覆盖前边的设置
+    ui->qwtPlot->setAxisScale(QwtPlot::xBottom, 0, 5, 1);  //设置坐标轴刻度范围,第一个数字:最小值;第二个数字:最大值;第三个数字:轴标步进
+    ui->qwtPlot->setAxisMaxMajor( QwtPlot::xBottom, 5 );  //设置坐标轴有几个数标
+    ui->qwtPlot->setAxisMaxMinor( QwtPlot::xBottom, 5 ); //设置坐标轴两个数标的中间分几个小份
+    ui->qwtPlot->setAxisScale(QwtPlot::yLeft, 0, 5, 1);  //设置坐标轴刻度范围,第一个数字:最小值;第二个数字:最大值;第三个数字:轴标步进
+    ui->qwtPlot->setAxisMaxMajor( QwtPlot::yLeft, 5 );  //设置坐标轴有几个数标
+    ui->qwtPlot->setAxisMaxMinor( QwtPlot::yLeft, 2 ); //设置坐标轴两个数标的中间分几个小份
+
+    //计算时间差
+    QTime my_start_time(0,0,0,0);
+    QTime my_end_time(0,0,1,10);
+    int timeElapsed = my_start_time.msecsTo(my_end_time);
+    qDebug() << "时间差(时):" << timeElapsed << "ms" << endl;
+    QDate my_start_date(2018, 6, 10);
+    QDate my_end_date(2018, 6, 11);
+    int dateElapset = my_start_date.daysTo(my_end_date);
+    qDebug() << "时间差(天):" << dateElapset << "天" << endl;
+    QDateTime my_start_datetime( my_start_date, my_start_time );
+    QDateTime my_end_datetime( my_end_date, my_end_time );
+    int datetimeElapset = my_start_datetime.secsTo( my_end_datetime );
+    qDebug() << "时间差(天.时):" << datetimeElapset << "s" << endl;
+
+
+
+    //缩放
+    QwtPlotMagnifier *magnifier;
+    magnifier = new QwtPlotMagnifier(ui->qwtPlot->canvas());
+    magnifier->setWheelFactor( 1.1 );  //设置缩放步进,同时与鼠标滚轮上下滚动与缩放方向有关
+
+    //平移
+    QwtPlotPanner *panner;
+    panner = new QwtPlotPanner(ui->qwtPlot->canvas());
+    //panner->setMouseButton( Qt::RightButton );  //设置哪个键平移画布
+
+    //局部缩放
+    QwtPlotZoomer *zoomer = new QwtPlotZoomer( ui->qwtPlot->canvas() );
+    zoomer->setZoomBase( QRectF(0,0,6,6) );  //矩形:左上(0,0),100为长宽,这个尺寸是图像复原的尺寸,使用这个操作需要设置坐标刻度ui->qwtPlot->setAxisScale,不然使用默认复原尺寸
+    //zoomer->setRubberBandPen( QColor( Qt::blue ) );  //设置选择放大区域的边框颜色
+    //zoomer->setMousePattern( QwtEventPattern::MouseSelect2, Qt::RightButton, Qt::ControlModifier );  //ctrl+右键==恢复到原始状态  MouseSelect2模式:默认左键缩放,恢复方式可以自定义
+    //zoomer->setMousePattern( QwtEventPattern::MouseSelect3, Qt::RightButton );  //右键==恢复到上一次扩大之前的状态,默认左键放大,右键恢复原样,恢复上一级原样可以自方式定义
+    //模式一,默认右键恢复原样,放大的方式可以自定义
+    //zoomer->setMousePattern( QwtEventPattern::MouseSelect1, Qt::LeftButton ); //左键放大,右键恢复原样
+    zoomer->setMousePattern( QwtEventPattern::MouseSelect1, Qt::LeftButton, Qt::ControlModifier ); //ctrl+左键放大,右键恢复原样
+    //模式二,默认左键放大,恢复原样的方式可以自定义
+    //模式三,默认左键放大,右键恢复原样,恢复上一级的方式可以自定义
+
+    //设置画笔
+    QPen pickerpen;
+    pickerpen.setColor(Qt::black);
+
+    //显示鼠标所在位置的坐标
+    QwtPlotPicker *picker;
+    picker = new QwtPlotPicker(QwtPlot::xBottom, QwtPlot::yLeft,
+                               QwtPicker::CrossRubberBand,
+                               QwtPicker::AlwaysOn, ui->qwtPlot->canvas());
+    picker->setTrackerPen(pickerpen);
+
+    //画线
+    QVector<double> x2,y2,y3; //模拟数据
+    x2.push_back(1);
+    x2.push_back(2);
+    x2.push_back(3);
+    y2.push_back(1);
+    y2.push_back(1.5);
+    y2.push_back(3);
+    y3.push_back(1);
+    y3.push_back(2.5);
+    y3.push_back(3);
+    QwtPlotCurve *curve, *curve2;  //创建曲线
+    curve = new QwtPlotCurve();
+    curve->setTitle("长度");     //曲线名字
+    curve->setPen(Qt::red, 1);  //曲线颜色,宽度
+    //curve->setStyle(QwtPlotCurve::Dots);  //散点图
+    //curve->setCurveAttribute(QwtPlotCurve::Lines, true);
+    curve->setSamples(x2, y2);  //曲线数据及绘制
+    curve->setRenderHint(QwtPlotItem::RenderAntialiased);  //反锯齿
+    curve->setSymbol(new QwtSymbol( QwtSymbol::Cross, Qt::NoBrush, QPen( Qt::color1), QSize(10, 10)));
+    //curve->setLegendAttribute( curve->LegendNoAttribute );
+    curve->attach(ui->qwtPlot);
+    curve2 = new QwtPlotCurve();  //第二条曲线
+    curve2->setPen(Qt::cyan, 2, Qt::DashLine);  //设置线的颜色,宽度,线型
+    curve2->setTitle("质量");
+    curve2->setCurveAttribute( QwtPlotCurve::CurveAttribute( QwtPlotCurve::Fitted ) );  //设置为平滑曲线
+    //curve2->setRenderHint( QwtPlotItem::RenderAntialiased, true );   //不知道有啥用
+    curve2->setLegendAttribute( curve2->LegendShowLine );  //设置legenditem使用的是颜色区分还是别的信息区分
+    curve2->setSamples(x2, y3);
+    curve2->attach(ui->qwtPlot);
+    //curve2->detach();  //取消线条
+
+    //插入图例legenditem
+    QwtPlotLegendItem *d_qwtplotlegenditem1;
+    d_qwtplotlegenditem1 = new QwtPlotLegendItem;
+    d_qwtplotlegenditem1->setAlignment( Qt::AlignRight | Qt::AlignTop);  // 右上角对齐
+    d_qwtplotlegenditem1->setMaxColumns( 1 );  //设置最大列数
+    d_qwtplotlegenditem1->setBorderPen( QPen(QColor(255, 0, 0)) );  //设置边缘画笔
+    d_qwtplotlegenditem1->setBackgroundBrush( QBrush(QColor(255, 255, 0, 100)) );   //设置背景笔刷, 透明度也在这里设置
+    d_qwtplotlegenditem1->setBackgroundMode( QwtPlotLegendItem::LegendBackground );  //画一个框还是分别画框
+    d_qwtplotlegenditem1->setTextPen( QPen(QColor(255, 0, 0)) );   //设置文本颜色
+    d_qwtplotlegenditem1->setItemMargin(20);  //设置边缘
+    d_qwtplotlegenditem1->setItemInterest( QwtPlotItem::ScaleInterest );     //不知道有啥用
+    d_qwtplotlegenditem1->setItemSpacing(20);   //下边没注释的没仔细区分过功能
+    d_qwtplotlegenditem1->setMargin(10);
+    d_qwtplotlegenditem1->setSpacing(20);
+    d_qwtplotlegenditem1->setBorderDistance(20);
+    d_qwtplotlegenditem1->setBorderRadius(9);
+    d_qwtplotlegenditem1->setItemAttribute( QwtPlotItem::AutoScale );
+    d_qwtplotlegenditem1->attach(ui->qwtPlot);
+
+    //插入图例 legend
+    QwtLegend *legend;
+    legend = new QwtLegend;
+    //legend->setFrameShape();
+    ui->qwtPlot->insertLegend(legend, QwtPlot::BottomLegend);  //插入到qwtplot里面  设置插入位置
+
+    //qwtmarker 标注图中的一个点
+    QwtPlotMarker *qwtplotmarker;
+    qwtplotmarker = new QwtPlotMarker( "one" );
+    QwtText title1;
+    title1.setText("平均值");
+    QFont font3("宋体",30);
+    title1.setFont(font3);
+    title1.setColor( Qt::green );
+    qwtplotmarker->setTitle("two");
+    //qwtplotmarker->setLabel( QwtText("mark" ) ); //标记内容
+    qwtplotmarker->setLabel(title1);  //如果需要更改标记内容的大小,在这里更改
+    qwtplotmarker->setValue( QPointF(2, 2) );  //要标记的点
+    qwtplotmarker->setItemAttribute(QwtPlotItem::AutoScale, true);  //设置marker的自动标尺
+    qwtplotmarker->setLabelAlignment( Qt::AlignRight | Qt::AlignTop );  //对齐
+    qwtplotmarker->setLabelOrientation(Qt::Horizontal);  //设置字体水平垂直
+    qwtplotmarker->setLineStyle( QwtPlotMarker::LineStyle::HLine
+                                 );  //设置标记风格
+    qwtplotmarker->setLinePen(QPen( Qt::red, 1, Qt::DashDotDotLine ));  //设置marker颜色和线型
+    qwtplotmarker->setSymbol( new QwtSymbol( QwtSymbol::DTriangle, Qt::NoBrush, QPen( Qt::color1), QSize(10, 10)) );  //被标记点的符号
+    qwtplotmarker->attach(ui->qwtPlot);
+
+    //可能会有用的操作,直接操作plot中的对象
+    QwtPlotItemList items = ui->qwtPlot->itemList( QwtPlotItem::Rtti_PlotCurve );  //获取程序运行时的曲线信息,可以使用size函数获得曲线数量
+    items[0]->setLegendIconSize(QSize( 10, 10 ));   //设置图标大小
+    items[0]->setVisible(true);   //设置折线是否可见
+
+    //调色板  下面没用
+    QPalette d_palette;
+    d_palette.setColor(QPalette::Background, QColor(255, 0, 0, 255));  //背景色
+    d_palette.setColor(QPalette::Foreground, QColor(0, 255, 0, 255));  //前景色
+
+    //画多条曲线,使用for循环里的同一个curve
+//    QVector<QVector<double>> y3;
+//    y3.push_back(y1);
+//    y3.push_back(y2);
+//    for(int i = 0; i < 2; i++){
+//        QwtPlotCurve *curve;
+//        QColor d_color;
+//        curve = new QwtPlotCurve();
+//        d_color.setHsl((25*i)%255, 255, ((i/10+1)*80)%255);
+//        curve->setPen( d_color, 3);
+//        curve->setTitle("质量");
+//        curve->setSamples(x, y3[i]);
+//        curve->attach(ui->qwtPlot);
+//    }
+
+    //重新绘制
+    ui->qwtPlot->replot();
 
     /***************************************************** 多选下拉框 *******************************************************/
     //---------列表形式
