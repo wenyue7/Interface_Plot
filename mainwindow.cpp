@@ -478,6 +478,11 @@ bool MainWindow::event(QEvent *event)
         }
         return false;  //这个地方我个人理解算是接收了事件,现象是如果在此处返回false,需要右击两次才能触发下面的mousePressEvent事件函数
     }
+    if(event->type() == QEvent::MouseMove){  //鼠标移动事件是指鼠标按下之后移动,而不是当前焦点窗口的移动
+        QMouseEvent *m_mouseMove = static_cast<QMouseEvent *>(event);
+        qDebug() << "current move position is: " << m_mouseMove->pos();
+        return true;
+    }
     return QMainWindow::event(event);  //注意:这句很重要
 }
 
