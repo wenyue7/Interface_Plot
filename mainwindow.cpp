@@ -78,51 +78,6 @@ MainWindow::MainWindow(QWidget *parent) :
     statuelabel_2->setFrameShadow(QFrame::Sunken);  //设置标签阴影
     ui->statusBar->addPermanentWidget(statuelabel_2);
     statuelabel_2->setText("永久信息");
-    /***************************************************** xml件操作 **************************************************/
-    QDomDocument doc;  //新建QDomDocument类对象，它代表一个XML文档
-    QFile file("./my.xml");  // 建立指向“my.xml”文件的QFile对象
-    if (!file.open(QIODevice::ReadOnly)) return;   // 以只读方式打开
-    if(!doc.setContent(&file)){
-        file.close();
-        qDebug() << "xml file open fail" << endl;
-        return;
-    }
-    file.close();  //关闭文件
-    //-----读xml
-    QDomNode firstNode = doc.firstChild(); //获取xml的第一个节点,即xml说明
-    qDebug() << firstNode.nodeName() << firstNode.nodeValue() << endl;
-    QDomElement docElem = doc.documentElement();  //获取根元素
-    qDebug() << "根元素是:" << docElem.tagName() << endl;
-    QDomNode n = docElem.firstChild();
-    QDomNodeList list = n.childNodes(); //获得根元素下第一个元素的所有子节点的列表
-    for(int i = 0; i < list.count(); i++){
-        QDomNode node = list.at(i);
-        if(node.isElement())
-            qDebug() << "根元素下第一个元素的子节点:" << node.toElement().tagName() << endl;
-    }
-    while(!n.isNull()){  //如果节点不为空   这个while循环打印所有根元素下的兄弟节点
-        if(n.isElement()){   //如果节点是元素
-            QDomElement e = n.toElement();  //将其转换为元素
-            qDebug() << e.tagName() << endl;
-            //qDebug() << e.text() << endl; //输出元素的值
-            //qDebug() << e.attribute("<属性名称>"); //输出<属性名称>对应的值
-        }
-        n = n.nextSibling();
-    }
-    //------写xml
-    QFile file1("new.xml");
-    file1.open(QIODevice::ReadWrite);
-    QDomDocument doc1;
-    QDomProcessingInstruction instruction;
-    instruction = doc1.createProcessingInstruction("xml","version=\"1.0\" encoding=\"GB2312\"");
-    doc1.appendChild(instruction);
-    QDomElement root = doc1.createElement("ipconfig");
-    doc1.appendChild(root);
-    QDomText text = doc1.createTextNode("textnode");
-    root.appendChild(text);
-    QTextStream out(&file1);
-    doc1.save(out,4);
-    file1.close();
 
     /***************************************************** 进度条 Bar 方式 **************************************************/
     ui->progressBar->setRange(0,5000);
@@ -445,6 +400,53 @@ MainWindow::MainWindow(QWidget *parent) :
     qDebug() << "current datetime:" << currenttime;
     qDebug() << "current datetime stamp:" << currenttime.toTime_t(); //将时间转化成时间戳,方法为从时间基点到设定时间的秒数
     qDebug() << "datetime stamp base on:" << currenttime.fromTime_t(0); //转化基点: 1970-01-01 08:01:01:000
+
+
+    /***************************************************** xml件操作 **************************************************/
+    QDomDocument doc;  //新建QDomDocument类对象，它代表一个XML文档
+    QFile file("./my.xml");  // 建立指向“my.xml”文件的QFile对象
+    if (!file.open(QIODevice::ReadOnly)) return;   // 以只读方式打开
+    if(!doc.setContent(&file)){
+        file.close();
+        qDebug() << "xml file open fail" << endl;
+        return;
+    }
+    file.close();  //关闭文件
+    //-----读xml
+    QDomNode firstNode = doc.firstChild(); //获取xml的第一个节点,即xml说明
+    qDebug() << firstNode.nodeName() << firstNode.nodeValue() << endl;
+    QDomElement docElem = doc.documentElement();  //获取根元素
+    qDebug() << "根元素是:" << docElem.tagName() << endl;
+    QDomNode n = docElem.firstChild();
+    QDomNodeList list = n.childNodes(); //获得根元素下第一个元素的所有子节点的列表
+    for(int i = 0; i < list.count(); i++){
+        QDomNode node = list.at(i);
+        if(node.isElement())
+            qDebug() << "根元素下第一个元素的子节点:" << node.toElement().tagName() << endl;
+    }
+    while(!n.isNull()){  //如果节点不为空   这个while循环打印所有根元素下的兄弟节点
+        if(n.isElement()){   //如果节点是元素
+            QDomElement e = n.toElement();  //将其转换为元素
+            qDebug() << e.tagName() << endl;
+            //qDebug() << e.text() << endl; //输出元素的值
+            //qDebug() << e.attribute("<属性名称>"); //输出<属性名称>对应的值
+        }
+        n = n.nextSibling();
+    }
+    //------写xml
+    QFile file1("new.xml");
+    file1.open(QIODevice::ReadWrite);
+    QDomDocument doc1;
+    QDomProcessingInstruction instruction;
+    instruction = doc1.createProcessingInstruction("xml","version=\"1.0\" encoding=\"GB2312\"");
+    doc1.appendChild(instruction);
+    QDomElement root = doc1.createElement("ipconfig");
+    doc1.appendChild(root);
+    QDomText text = doc1.createTextNode("textnode");
+    root.appendChild(text);
+    QTextStream out(&file1);
+    doc1.save(out,4);
+    file1.close();
 }
 
 MainWindow::~MainWindow()
@@ -459,7 +461,7 @@ bool MainWindow::eventFilter(QObject *watched, QEvent *event)
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
             if(mouseEvent->button() == Qt::LeftButton) qDebug() << "This is eventFilter  You Press LeftButton" << endl;
             if(mouseEvent->button() == Qt::RightButton) qDebug() << "This is eventFilter  You Press RightButton" << endl;
-            return true; //return true表示接受事件,return false表示不接收事件,会继续传递处理
+            return true; //return true表示接受事件,事件将不再继续传递,return false表示不接收事件,会继续传递处理.
         }else{
             return false;
         }
@@ -474,16 +476,17 @@ bool MainWindow::event(QEvent *event)
         QMouseEvent *mouseevent = static_cast<QMouseEvent *>(event);
         if(mouseevent->button() == Qt::LeftButton){
             qDebug() << "This is event()  You Clicked mouset leftbutton" << endl;
-            return true;
+            return true;  //返回值指示是否处理了事件。 true值表示进行了处理,可防止事件发送到其他对象。
+        }else{
+            return false;
         }
-        return false;  //这个地方我个人理解算是接收了事件,现象是如果在此处返回false,需要右击两次才能触发下面的mousePressEvent事件函数
-    }
-    if(event->type() == QEvent::MouseMove){  //鼠标移动事件是指鼠标按下之后移动,而不是当前焦点窗口的移动
+    }else if(event->type() == QEvent::MouseMove){  //鼠标移动事件是指鼠标按下之后移动,而不是当前焦点窗口的移动
         QMouseEvent *m_mouseMove = static_cast<QMouseEvent *>(event);
         qDebug() << "current move position is: " << m_mouseMove->pos();
         return true;
+    }else{
+        return QMainWindow::event(event);  //注意:这句很重要
     }
-    return QMainWindow::event(event);  //注意:这句很重要
 }
 
 void MainWindow::mousePressEvent(QMouseEvent *event)
